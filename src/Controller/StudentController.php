@@ -15,17 +15,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class StudentController extends AbstractController
 {
-    private StudentRepository $studentRepository;
-
-    /**
-     * StudentController constructor.
-     * @param StudentRepository $studentRepository
-     */
-    public function __construct(StudentRepository $studentRepository)
-    {
-        $this->studentRepository = $studentRepository;
-    }
-
     /**
      * @Route("/students", name="add_student", methods={"POST"})
      * @param Request $request
@@ -50,7 +39,14 @@ class StudentController extends AbstractController
             throw new NotFoundHttpException('Teacher with the requested ID is not found!');
         }
 
-        $this->studentRepository->add($data['firstName'], $data['lastName'], $data['email'], $address, $teacher);
+        $student = new Student();
+        $student->setFirstName($data['firstName'])
+            ->setLastName($data['lastName'])
+            ->setEmail($data['email'])
+            ->setAddress($address)
+            ->setTeacher($teacher);
+        $this->getDoctrine()->getManager()->persist($student);
+        $this->getDoctrine()->getManager()->flush();
 
         return new JsonResponse(['status' => 'Student added!'], Response::HTTP_OK);
     }
@@ -76,7 +72,7 @@ class StudentController extends AbstractController
      */
     public function getAll(): JsonResponse
     {
-        $students = $this->studentRepository->findAll();
+        $students = $this->getDoctrine()->getRepository(Student::class)->findAll();
 
         if ($students === null) {
             throw new NotFoundHttpException('No student found!');
@@ -112,7 +108,8 @@ class StudentController extends AbstractController
         empty($data['address']['zipcode']) ? true : $student->getAddress()->setZipcode($data['address']['zipcode']);
         empty($data['teacher_id']) ? true : $student->setTeacher($teacherRepository->findOneBy(['id' => $data['teacher_id']]));
 
-        $this->studentRepository->update($student);
+        $this->getDoctrine()->getManager()->persist($student);
+        $this->getDoctrine()->getManager()->flush();
 
         return new JsonResponse($student->toArray(), Response::HTTP_OK);
     }
@@ -128,7 +125,8 @@ class StudentController extends AbstractController
             throw new NotFoundHttpException('Student with the requested ID is not found!');
         }
 
-        $this->studentRepository->delete($student);
+        $this->getDoctrine()->getManager()->remove($student);
+        $this->getDoctrine()->getManager()->flush();
 
         return new JsonResponse(['status' => 'Student deleted!'], Response::HTTP_NO_CONTENT);
     }

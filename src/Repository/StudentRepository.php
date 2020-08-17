@@ -17,35 +17,9 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class StudentRepository extends ServiceEntityRepository
 {
-    private EntityManagerInterface $manager;
-    public function __construct(ManagerRegistry $registry, EntityManagerInterface $manager)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Student::class);
-        $this->manager = $manager;
-    }
-
-    public function add(string $firstName, string $lastName, string $email, Address $address, Teacher $teacher): void
-    {
-        $student = new Student();
-        $student->setFirstName($firstName)
-            ->setLastName($lastName)
-            ->setEmail($email)
-            ->setAddress($address)
-            ->setTeacher($teacher);
-        $this->manager->persist($student);
-        $this->manager->flush();
-    }
-
-    public function update(Student $student)
-    {
-        $this->manager->persist($student);
-        $this->manager->flush();
-    }
-
-    public function delete(Student $student)
-    {
-        $this->manager->remove($student);
-        $this->manager->flush();
     }
 
     // /**

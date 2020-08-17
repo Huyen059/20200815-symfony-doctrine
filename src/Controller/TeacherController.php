@@ -15,17 +15,6 @@ use Symfony\Component\Validator\Constraints\Json;
 
 class TeacherController extends AbstractController
 {
-    private TeacherRepository $teacherRepository;
-
-    /**
-     * TeacherController constructor.
-     * @param TeacherRepository $teacherRepository
-     */
-    public function __construct(TeacherRepository $teacherRepository)
-    {
-        $this->teacherRepository = $teacherRepository;
-    }
-
     /**
      * @Route("/teachers", name="add_teacher", methods={"POST"})
      * @param Request $request
@@ -43,8 +32,13 @@ class TeacherController extends AbstractController
         }
 
         $address = new Address($data['address']['street'], $data['address']['streetNumber'], $data['address']['city'], $data['address']['zipcode']);
-        $this->teacherRepository->add($data['firstName'], $data['lastName'], $data['email'], $address);
-
+        $teacher = new Teacher();
+        $teacher->setFirstName($data['firstName'])
+            ->setLastName($data['lastName'])
+            ->setEmail($data['email'])
+            ->setAddress($address);
+        $this->getDoctrine()->getManager()->persist($teacher);
+        $this->getDoctrine()->getManager()->flush();
         return new JsonResponse(['status' => 'Teacher added!'], Response::HTTP_OK);
     }
 
@@ -69,7 +63,7 @@ class TeacherController extends AbstractController
      */
     public function getAll(): JsonResponse
     {
-        $teachers = $this->teacherRepository->findAll();
+        $teachers = $this->getDoctrine()->getRepository(Teacher::class)->findAll();
 
         if ($teachers === null) {
             throw new NotFoundHttpException('No teacher found!');
@@ -106,7 +100,8 @@ class TeacherController extends AbstractController
         empty($data['address']['city']) ? true : $teacher->getAddress()->setCity($data['address']['city']);
         empty($data['address']['zipcode']) ? true : $teacher->getAddress()->setZipcode($data['address']['zipcode']);
 
-        $this->teacherRepository->update($teacher);
+        $this->getDoctrine()->getManager()->persist($teacher);
+        $this->getDoctrine()->getManager()->flush();
 
         return new JsonResponse($teacher->toArray(), Response::HTTP_OK);
     }
@@ -122,7 +117,8 @@ class TeacherController extends AbstractController
             throw new NotFoundHttpException('Teacher with the requested ID is not found!');
         }
 
-        $this->teacherRepository->delete($teacher);
+        $this->getDoctrine()->getManager()->remove($teacher);
+        $this->getDoctrine()->getManager()->flush();
 
         return new JsonResponse(['status' => 'Teacher deleted!'], Response::HTTP_NO_CONTENT);
     }
