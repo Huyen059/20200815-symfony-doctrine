@@ -29,6 +29,21 @@ class Address
      */
     private $zipcode;
 
+    /**
+     * Address constructor.
+     * @param $street
+     * @param $streetNumber
+     * @param $city
+     * @param $zipcode
+     */
+    public function __construct($street, $streetNumber, $city, $zipcode)
+    {
+        $this->street = $street;
+        $this->streetNumber = $streetNumber;
+        $this->city = $city;
+        $this->zipcode = $zipcode;
+    }
+
     public function getStreet(): ?string
     {
         return $this->street;

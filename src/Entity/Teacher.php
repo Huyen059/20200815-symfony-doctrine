@@ -135,11 +135,16 @@ class Teacher
 
     public function toArray(): array
     {
+        $students = [];
+        foreach ($this->getStudents() as $student) {
+            $students[] = ['id' => $student->getId(), 'fullName' => $student->getFirstName() . " " . $student->getLastName()];
+        }
         return [
             'firstName' => $this->getFirstName(),
             'lastName' => $this->getLastName(),
             'email' => $this->getEmail(),
-            'address' => $this->getAddress()->toArray()
+            'address' => $this->getAddress()->toArray(),
+            'students' => $students
         ];
     }
 }

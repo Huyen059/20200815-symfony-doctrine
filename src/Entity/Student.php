@@ -115,7 +115,7 @@ class Student
             'lastName' => $this->getLastName(),
             'email' => $this->getEmail(),
             'address' => $this->getAddress()->toArray(),
-            'teacher' => $this->getTeacher()->toArray()
+            'teacher_id' => $this->getTeacher()->getId()
         ];
     }
 }
